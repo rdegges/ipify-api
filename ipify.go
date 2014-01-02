@@ -14,7 +14,7 @@ type IPAddress struct {
 }
 
 func ipify(w http.ResponseWriter, r *http.Request) {
-	host, _, err := net.SplitHostPort(r.Header["X-Forwarded-For"][len(r.Header["X-Forwarded-For"])-1])
+	host, _, err := net.ParseIP(r.Header["X-Forwarded-For"][len(r.Header["X-Forwarded-For"])-1]).String()
 	if err != nil {
 		log.Fatal("SplitHostPort:", err)
 	}
