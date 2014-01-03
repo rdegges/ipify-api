@@ -27,8 +27,8 @@ func textip(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, host)
 }
 
-func errorHandler(w http.ResponseWriter, r *http.Request, status int) {
-	w.WriteHeader(status)
+func NotFound(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(404)
 }
 
 func main() {
