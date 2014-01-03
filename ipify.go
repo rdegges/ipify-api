@@ -27,7 +27,7 @@ func textip(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for k, _ := range r.Form {
-		fmt.Println(k, r.Form[k])
+		fmt.Println(k, r.Form[k][0])
 	}
 
 	host := net.ParseIP(r.Header["X-Forwarded-For"][len(r.Header["X-Forwarded-For"])-1]).String()
