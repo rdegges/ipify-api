@@ -27,6 +27,10 @@ func textip(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, host)
 }
 
+func errorHandler(w http.ResponseWriter, r *http.Request, status int) {
+	w.WriteHeader(status)
+}
+
 func main() {
 	http.HandleFunc("/json", jsonip)
 	http.HandleFunc("/text", textip)
