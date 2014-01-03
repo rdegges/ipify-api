@@ -21,6 +21,13 @@ func jsonip(w http.ResponseWriter, r *http.Request) {
 }
 
 func textip(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(r.Form)
+	//fmt.Fprintf(w, r.Form["format"])
+
 	host := net.ParseIP(r.Header["X-Forwarded-For"][len(r.Header["X-Forwarded-For"])-1]).String()
 
 	w.Header().Set("Content-Type", "text/plain")
