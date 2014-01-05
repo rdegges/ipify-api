@@ -34,17 +34,14 @@ func getIP(w http.ResponseWriter, r *http.Request) {
 	// If the user specifies a 'format' querystring, we'll try to return the
 	// user's IP address in the specified format.
 	if format, ok := r.Form["format"]; ok && len(format) > 0 {
-		fmt.Println("DEBUG", format[0])
+		jsonStr, _ := json.Marshal(IPAddress{ip})
+
 		switch format[0] {
 		case "json":
-			jsonStr, _ := json.Marshal(IPAddress{ip})
-
 			w.Header().Set("Content-Type", "application/json")
 			fmt.Fprintf(w, string(jsonStr))
 			return
 		case "jsonp":
-			jsonStr, _ := json.Marshal(IPAddress{ip})
-
 			// If the user specifies a 'callback' parameter, we'll use that as
 			// the name of our JSONP callback.
 			callback := "callback"
