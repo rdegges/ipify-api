@@ -1,1 +1,1 @@
-web: ipify
+web: main
