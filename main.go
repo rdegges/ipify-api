@@ -62,7 +62,6 @@ func getIP(w http.ResponseWriter, r *http.Request) {
 	// IP in plain text.
 	w.Header().Set("Content-Type", "text/plain")
 	fmt.Fprintf(w, ip)
-
 }
 
 // main launches our web server which runs indefinitely.
