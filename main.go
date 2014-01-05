@@ -18,29 +18,38 @@ type IPAddress struct {
 	IP string `json:"ip"`
 }
 
-func jsonip(w http.ResponseWriter, r *http.Request) {
-	host := net.ParseIP(r.Header["X-Forwarded-For"][len(r.Header["X-Forwarded-For"])-1]).String()
-	jsonStr, _ := json.Marshal(IPAddress{host})
+//func jsonip(w http.ResponseWriter, r *http.Request) {
+//	host := net.ParseIP(r.Header["X-Forwarded-For"][len(r.Header["X-Forwarded-For"])-1]).String()
+//	jsonStr, _ := json.Marshal(IPAddress{host})
+//
+//	w.Header().Set("Content-Type", "application/json")
+//	fmt.Fprintf(w, string(jsonStr))
+//}
 
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, string(jsonStr))
-}
-
-func textip(w http.ResponseWriter, r *http.Request) {
+// getIP returns a user's public facing IP address (IPv4 OR IPv6).
+//
+// By default, it will return the IP address in plain text, but can also return
+// data in both JSON and JSONP if requested to.
+func getIP(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		panic(err)
 	}
 
-	for k, _ := range r.Form {
-		fmt.Println(k, r.Form[k][0])
+	ip := net.ParseIP(r.Header["X-Forwarded-For"][len(r.Header["X-Forwarded-For"])-1]).String()
+
+	if format, ok := r.Form["format"]; ok && len(format) > 0 {
+		switch format[0] {
+		case "json":
+			jsonStr, _ := json.Marshal(IPAddress{ip})
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Fprintf(w, string(jsonStr))
+		default:
+			w.Header().Set("Content-Type", "text/plain")
+			fmt.Fprintf(w, ip)
+		}
 	}
-	fmt.Println(r.Form["hiya"][0])
 
-	host := net.ParseIP(r.Header["X-Forwarded-For"][len(r.Header["X-Forwarded-For"])-1]).String()
-
-	w.Header().Set("Content-Type", "text/plain")
-	fmt.Fprintf(w, host)
 }
 
 func NotFound(w http.ResponseWriter, r *http.Request) {
@@ -48,8 +57,7 @@ func NotFound(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/json", jsonip)
-	http.HandleFunc("/text", textip)
+	http.HandleFunc("/", getIP)
 
 	err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 	if err != nil {
