@@ -1,3 +1,9 @@
+// ipify-api
+//
+// This software implements a basic REST API that provides users with a simple
+// way to query their public IP address (IPv4 or IPv6).  This code assumes that
+// you are running it on Heroku's platform (https://www.heroku.com/).
+
 package main
 
 import (
