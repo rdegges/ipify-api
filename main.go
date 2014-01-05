@@ -54,10 +54,7 @@ func getIP(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func NotFound(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(404)
-}
-
+// main launches our web server which runs indefinitely.
 func main() {
 	http.HandleFunc("/", getIP)
 
