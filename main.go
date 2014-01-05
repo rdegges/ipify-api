@@ -31,6 +31,7 @@ func getIP(w http.ResponseWriter, r *http.Request) {
 	ip := net.ParseIP(r.Header["X-Forwarded-For"][len(r.Header["X-Forwarded-For"])-1]).String()
 
 	if format, ok := r.Form["format"]; ok && len(format) > 0 {
+		fmt.Println("DEBUG", format[0])
 		switch format[0] {
 		case "json":
 			jsonStr, _ := json.Marshal(IPAddress{ip})
