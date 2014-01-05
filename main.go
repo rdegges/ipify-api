@@ -14,6 +14,7 @@ import (
 	"os"
 )
 
+// IPAddress is a simple struct that we use to marshal our JSON responses.
 type IPAddress struct {
 	IP string `json:"ip"`
 }
