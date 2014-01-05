@@ -30,8 +30,8 @@ func getIP(w http.ResponseWriter, r *http.Request) {
 
 	ip := net.ParseIP(r.Header["X-Forwarded-For"][len(r.Header["X-Forwarded-For"])-1]).String()
 
-	fmt.Println("DEBUG", r.Form["format"])
-	fmt.Println("DEBUG", len(r.Form["format"]))
+	// If the user specifies a 'format' querystring, we'll try to return the
+	// user's IP address in the specified format.
 	if format, ok := r.Form["format"]; ok && len(format) > 0 {
 		fmt.Println("DEBUG", format[0])
 		switch format[0] {
@@ -43,7 +43,13 @@ func getIP(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "text/plain")
 			fmt.Fprintf(w, ip)
 		}
+		return
 	}
+
+	// If no 'format' querystring was specified, we'll default to returning the
+	// IP in plain text.
+	w.Header().Set("Content-Type", "text/plain")
+	fmt.Fprintf(w, ip)
 
 }
 
