@@ -18,14 +18,6 @@ type IPAddress struct {
 	IP string `json:"ip"`
 }
 
-//func jsonip(w http.ResponseWriter, r *http.Request) {
-//	host := net.ParseIP(r.Header["X-Forwarded-For"][len(r.Header["X-Forwarded-For"])-1]).String()
-//	jsonStr, _ := json.Marshal(IPAddress{host})
-//
-//	w.Header().Set("Content-Type", "application/json")
-//	fmt.Fprintf(w, string(jsonStr))
-//}
-
 // getIP returns a user's public facing IP address (IPv4 OR IPv6).
 //
 // By default, it will return the IP address in plain text, but can also return
