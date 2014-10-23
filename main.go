@@ -24,6 +24,10 @@ type IPAddress struct {
 // By default, it will return the IP address in plain text, but can also return
 // data in both JSON and JSONP if requested to.
 func getIP(w http.ResponseWriter, r *http.Request) {
+
+	// Enable CORS support.
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	err := r.ParseForm()
 	if err != nil {
 		panic(err)
