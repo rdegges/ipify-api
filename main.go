@@ -1,8 +1,9 @@
 // ipify-api
 //
-// This software implements a basic REST API that provides users with a simple
-// way to query their public IP address (IPv4 or IPv6).  This code assumes that
-// you are running it on Heroku's platform (https://www.heroku.com/).
+// This is the main package which starts up and runs our REST API service.
+//
+// ipify is a simple API service which returns a user's public IP address (it
+// supports handling both IPv4 and IPv6 addresses).
 
 package main
 
@@ -14,7 +15,7 @@ import (
 	"os"
 )
 
-// IPAddress is a simple struct that we use to marshal our JSON responses.
+// IPAddress is a struct we use to represent JSON API responses.
 type IPAddress struct {
 	IP string `json:"ip"`
 }
