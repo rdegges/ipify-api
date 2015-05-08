@@ -27,6 +27,12 @@ type IPAddress struct {
 // data in both JSON and JSONP if requested to.
 func getIP(w http.ResponseWriter, r *http.Request) {
 
+	// If the user is hitting an invalid URI, we'll return a 404.
+	if r.URL.Path != "/" {
+		w.WriteHeader(404)
+		return
+	}
+
 	// Enable CORS support.
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
