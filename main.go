@@ -34,6 +34,9 @@ func getIP(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
+	// DEBUGGING
+	fmt.Println("debug: " + r.Header.Get("X-Forwarded-For"))
+
 	ip := net.ParseIP(r.Header["X-Forwarded-For"][len(r.Header["X-Forwarded-For"])-1]).String()
 
 	// If the user specifies a 'format' querystring, we'll try to return the
