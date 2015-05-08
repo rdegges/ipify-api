@@ -13,6 +13,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 )
 
 // IPAddress is a struct we use to represent JSON API responses.
@@ -34,10 +35,11 @@ func getIP(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	// DEBUGGING
-	fmt.Println("debug: " + r.Header.Get("X-Forwarded-For"))
-
-	ip := net.ParseIP(r.Header["X-Forwarded-For"][len(r.Header["X-Forwarded-For"])-1]).String()
+	// We'll always grab the first IP address in the X-Forwarded-For header
+	// list.  We do this because this is always the *origin* IP address, which
+	// is the *true* IP of the user.  For more information on this, see the
+	// Wikipedia page: https://en.wikipedia.org/wiki/X-Forwarded-For
+	ip := net.ParseIP(strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]).String()
 
 	// If the user specifies a 'format' querystring, we'll try to return the
 	// user's IP address in the specified format.
