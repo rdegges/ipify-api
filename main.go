@@ -10,6 +10,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"net"
 	"net/http"
 	"os"
@@ -79,7 +80,10 @@ func getIP(w http.ResponseWriter, r *http.Request) {
 
 // main launches our web server which runs indefinitely.
 func main() {
-	http.HandleFunc("/", getIP)
+	r := mux.NewRouter()
+
+	r.HandleFunc("/", getIP)
+	http.Handle("/", r)
 
 	err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 	if err != nil {
