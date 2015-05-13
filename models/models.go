@@ -1,4 +1,4 @@
-// models
+// ipify-api/models
 //
 // This package contains all models used in the ipify service.
 
