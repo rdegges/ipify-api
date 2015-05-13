@@ -10,6 +10,7 @@ package main
 import (
 	"github.com/gorilla/mux"
 	"github.com/rdegges/ipify-api/api"
+	"log"
 	"net/http"
 	"os"
 )
@@ -20,8 +21,9 @@ func main() {
 	r.HandleFunc("/", api.GetIP)
 	http.Handle("/", r)
 
+	log.Println("Starting HTTP server on port:", os.Getenv("PORT"))
 	err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 	if err != nil {
-		panic(err)
+		log.Fatal("Error: Couldn't start the HTTP server:", err)
 	}
 }
