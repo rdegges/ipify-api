@@ -11,16 +11,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/rdegges/ipify-api/models"
 	"net"
 	"net/http"
 	"os"
 	"strings"
 )
-
-// IPAddress is a struct we use to represent JSON API responses.
-type IPAddress struct {
-	IP string `json:"ip"`
-}
 
 // getIP returns a user's public facing IP address (IPv4 OR IPv6).
 //
@@ -51,7 +47,7 @@ func getIP(w http.ResponseWriter, r *http.Request) {
 	// If the user specifies a 'format' querystring, we'll try to return the
 	// user's IP address in the specified format.
 	if format, ok := r.Form["format"]; ok && len(format) > 0 {
-		jsonStr, _ := json.Marshal(IPAddress{ip})
+		jsonStr, _ := json.Marshal(models.IPAddress{ip})
 
 		switch format[0] {
 		case "json":
