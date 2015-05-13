@@ -81,7 +81,6 @@ func getIP(w http.ResponseWriter, r *http.Request) {
 // main launches our web server which runs indefinitely.
 func main() {
 	r := mux.NewRouter()
-
 	r.HandleFunc("/", getIP)
 	http.Handle("/", r)
 
