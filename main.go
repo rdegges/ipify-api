@@ -9,7 +9,7 @@ package main
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/rdegges/ipify-api/controllers"
+	"github.com/rdegges/ipify-api/api"
 	"net/http"
 	"os"
 )
@@ -17,7 +17,7 @@ import (
 // main launches our web server which runs indefinitely.
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/", controllers.GetIP)
+	r.HandleFunc("/", api.GetIP)
 	http.Handle("/", r)
 
 	err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)

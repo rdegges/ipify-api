@@ -1,9 +1,9 @@
-// ipify-api/controllers
+// ipify-api/api
 //
-// This package holds our API controllers which we use to service REST API
+// This package holds our API handlers which we use to service REST API
 // requests.
 
-package controllers
+package api
 
 import (
 	"encoding/json"
