@@ -26,9 +26,6 @@ func GetIP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Enable CORS support.
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
 	err := r.ParseForm()
 	if err != nil {
 		panic(err)
