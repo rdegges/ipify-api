@@ -21,12 +21,6 @@ import (
 // data in both JSON and JSONP if requested to.
 func GetIP(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
-	// If the user is hitting an invalid URI, we'll return a 404.
-	if r.URL.Path != "/" {
-		w.WriteHeader(404)
-		return
-	}
-
 	err := r.ParseForm()
 	if err != nil {
 		panic(err)
