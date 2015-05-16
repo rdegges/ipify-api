@@ -61,16 +61,3 @@ func GetIP(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "text/plain")
 	fmt.Fprintf(w, ip)
 }
-
-// NotFound renders a not found response for invalid API endpoints.
-func NotFound(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(404)
-	return
-}
-
-// MethodNotAllowed renders a method not allowed response for invalid request
-// types.
-func MethodNotAllowed(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(405)
-	return
-}
