@@ -8,6 +8,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/julienschmidt/httprouter"
 	"github.com/rdegges/ipify-api/models"
 	"net"
 	"net/http"
@@ -18,7 +19,7 @@ import (
 //
 // By default, it will return the IP address in plain text, but can also return
 // data in both JSON and JSONP if requested to.
-func GetIP(w http.ResponseWriter, r *http.Request) {
+func GetIP(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	// If the user is hitting an invalid URI, we'll return a 404.
 	if r.URL.Path != "/" {
@@ -65,4 +66,17 @@ func GetIP(w http.ResponseWriter, r *http.Request) {
 	// IP in plain text.
 	w.Header().Set("Content-Type", "text/plain")
 	fmt.Fprintf(w, ip)
+}
+
+// NotFound renders a not found response for invalid API endpoints.
+func NotFound(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(404)
+	return
+}
+
+// MethodNotAllowed renders a method not allowed response for invalid request
+// types.
+func MethodNotAllowed(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(405)
+	return
 }

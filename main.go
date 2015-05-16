@@ -8,8 +8,7 @@
 package main
 
 import (
-	"github.com/codegangsta/negroni"
-	"github.com/gorilla/mux"
+	"github.com/julienschmidt/httprouter"
 	"github.com/rdegges/ipify-api/api"
 	"github.com/rs/cors"
 	"log"
@@ -21,20 +20,19 @@ import (
 func main() {
 
 	// Setup all routes.  We only service API requests, so this is basic.
-	router := mux.NewRouter()
-	router.HandleFunc("/", api.GetIP)
+	router := httprouter.New()
+	router.GET("/", api.GetIP)
+
+	// Setup 404 / 405 handlers.
+	router.NotFound = api.NotFound
+	router.MethodNotAllowed = api.MethodNotAllowed
 
 	// Setup middlewares.  For this we're basically adding:
 	//	- Support for CORS to make JSONP work.
-	n := negroni.New()
-	n.Use(cors.Default())
-	n.UseHandler(router)
+	handler := cors.Default().Handler(router)
 
 	// Start the server.
 	log.Println("Starting HTTP server on port:", os.Getenv("PORT"))
-	err := http.ListenAndServe(":"+os.Getenv("PORT"), n)
-	if err != nil {
-		log.Fatal("Error: Couldn't start the HTTP server:", err)
-	}
+	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), handler))
 
 }
