@@ -32,7 +32,12 @@ func main() {
 	handler := cors.Default().Handler(router)
 
 	// Start the server.
-	log.Println("Starting HTTP server on port:", os.Getenv("PORT"))
-	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), handler))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+
+	log.Println("Starting HTTP server on port:", port)
+	log.Fatal(http.ListenAndServe(":"+port, handler))
 
 }
