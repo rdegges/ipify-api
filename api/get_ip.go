@@ -12,6 +12,7 @@ import (
 	"github.com/rdegges/ipify-api/models"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -32,7 +33,7 @@ func GetIP(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	// Wikipedia page: https://en.wikipedia.org/wiki/X-Forwarded-For
 	ip := net.ParseIP(strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]).String()
 
-	fmt.Println("DEBUG:", r.Header.Get("X-Forwarded-For"))
+	fmt.Fprintln(os.Stderr, "WOOT:", r.Header.Get("X-Forwarded-For"))
 
 	// If the user specifies a 'format' querystring, we'll try to return the
 	// user's IP address in the specified format.
