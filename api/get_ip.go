@@ -27,8 +27,6 @@ func GetIP(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		panic(err)
 	}
 
-	fmt.Println("WOOOOOOOOOOOO")
-
 	// We'll always grab the first IP address in the X-Forwarded-For header
 	// list.  We do this because this is always the *origin* IP address, which
 	// is the *true* IP of the user.  For more information on this, see the
