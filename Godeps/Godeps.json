@@ -4,11 +4,12 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/julienschmidt/httprouter",
-			"Rev": "8c199fb6259ffc1af525cc3ad52ee60ba8359669"
+			"Comment": "v1.1-7-g9034cff",
+			"Rev": "9034cff70da2ab5888417e40d23cd213a1587f16"
 		},
 		{
 			"ImportPath": "github.com/rs/cors",
-			"Rev": "5e4ce6bc0ecd3472f6f943666d84876691be2ced"
+			"Rev": "eb527c8097e0f19a3ff7b253a3fe70545070f420"
 		}
 	]
 }

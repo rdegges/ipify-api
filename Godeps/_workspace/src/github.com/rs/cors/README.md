@@ -16,7 +16,8 @@ import (
 )
 
 func main() {
-    h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    mux := http.NewServeMux()
+    mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
         w.Header().Set("Content-Type", "application/json")
         w.Write([]byte("{\"hello\": \"world\"}"))
     })
@@ -24,7 +25,7 @@ func main() {
     // cors.Default() setup the middleware with default options being
     // all origins accepted with simple methods (GET, POST). See
     // documentation below for more options.
-    handler := cors.Default().Handler(h)
+    handler := cors.Default().Handler(mux)
     http.ListenAndServe(":8080", handler)
 }
 ```
@@ -70,13 +71,15 @@ c := cors.New(cors.Options{
 handler = c.Handler(handler)
 ```
 
-* **AllowedOrigins** `[]string`: A list of origins a cross-domain request can be executed from. If the special `*` value is present in the list, all origins will be allowed. The default value is `*`.
+* **AllowedOrigins** `[]string`: A list of origins a cross-domain request can be executed from. If the special `*` value is present in the list, all origins will be allowed. An origin may contain a wildcard (`*`) to replace 0 or more characters (i.e.: `http://*.domain.com`). Usage of wildcards implies a small performance penality. Only one wildcard can be used per origin. The default value is `*`.
 * **AllowOriginFunc** `func (origin string) bool`: A custom function to validate the origin. It take the origin as argument and returns true if allowed or false otherwise. If this option is set, the content of `AllowedOrigins` is ignored
-* **AllowedMethods** `[]string`: A list of methods the client is allowed to use with cross-domain requests.
-* **AllowedHeaders** `[]string`: A list of non simple headers the client is allowed to use with cross-domain requests. Default value is simple methods (`GET` and `POST`)
+* **AllowedMethods** `[]string`: A list of methods the client is allowed to use with cross-domain requests. Default value is simple methods (`GET` and `POST`).
+* **AllowedHeaders** `[]string`: A list of non simple headers the client is allowed to use with cross-domain requests.
 * **ExposedHeaders** `[]string`: Indicates which headers are safe to expose to the API of a CORS API specification
 * **AllowCredentials** `bool`: Indicates whether the request can include user credentials like cookies, HTTP authentication or client side SSL certificates. The default is `false`.
 * **MaxAge** `int`: Indicates how long (in seconds) the results of a preflight request can be cached. The default is `0` which stands for no max age.
+* **OptionsPassthrough** `bool`: Instructs preflight to let other potential next handlers to process the `OPTIONS` method. Turn this on if your application handles `OPTIONS`.
+* **Debug** `bool`: Debugging flag adds additional output to debug server side CORS issues.
 
 See [API documentation](http://godoc.org/github.com/rs/cors) for more info.
 
