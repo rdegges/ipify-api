@@ -24,8 +24,8 @@ func main() {
 	router.GET("/", api.GetIP)
 
 	// Setup 404 / 405 handlers.
-	router.NotFound = api.NotFound
-	router.MethodNotAllowed = api.MethodNotAllowed
+	router.NotFound = http.HandlerFunc(api.NotFound)
+	router.MethodNotAllowed = http.HandlerFunc(api.MethodNotAllowed)
 
 	// Setup middlewares.  For this we're basically adding:
 	//	- Support for CORS to make JSONP work.
