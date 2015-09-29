@@ -4,5 +4,4 @@ go:
   - 1.5
 before_script: go get github.com/mitchellh/gox
 script: go build
-before_deploy: gox -osarch="linux/amd64"
-deploy: which ssh
+after_success: gox -osarch="linux/amd64" && echo $TRAVIS_TEST_RESULT
