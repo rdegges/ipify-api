@@ -2,4 +2,6 @@ sudo: false
 language: go
 go:
   - 1.5
+before_script: go get github.com/mitchellh/gox
 script: go build
+after_success: gox -osarch="linux/amd64"
