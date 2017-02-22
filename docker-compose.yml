@@ -1,0 +1,13 @@
+version: '2'
+services:
+  api:
+    build: .
+    volumes:
+      - ./main.go:/var/www/main.go
+      - ./api/:/var/www/api/
+      - ./models:/var/www/models
+    environment:
+      - PORT=9091
+    ports:
+      - "9091:9091"
+    
