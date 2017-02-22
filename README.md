@@ -3,7 +3,7 @@ The source behind https://www.ipify.org/.
 
 ## Setup
 
-The easiest way to get set up is using [Docker](https://docker.com/).
+The easiest way to get set up is using [Docker](https://www.docker.com/).
 
 ```shell
 docker-compose up --build
