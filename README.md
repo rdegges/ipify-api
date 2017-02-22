@@ -1,5 +1,5 @@
 # ipify-api
-The source behind https://www.ipify.org/.
+The source behind [ipify.org](https://www.ipify.org/)
 
 ## Setup
 
