@@ -1,7 +1,7 @@
 sudo: false
 language: go
 go:
-  - 1.5
+  - 1.8
 before_script: go get github.com/mitchellh/gox
 script: go build
 after_success: gox -osarch="linux/amd64" && echo $TRAVIS_TEST_RESULT
