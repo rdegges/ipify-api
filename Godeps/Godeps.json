@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/rdegges/ipify-api",
-	"GoVersion": "go1.7",
+	"GoVersion": "go1.8",
 	"GodepVersion": "v79",
 	"Deps": [
 		{
