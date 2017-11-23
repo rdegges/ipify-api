@@ -1,8 +1,21 @@
-FROM golang:1.6
-WORKDIR /var/www
-ADD . /var/www
+FROM golang:1.9
 
-RUN go get github.com/julienschmidt/httprouter github.com/rdegges/ipify-api/api github.com/rs/cors
-RUN go build -o ./server .
+RUN mkdir -p /go/src/github.com/rdegges/ipify-api
 
-CMD ["./server"]
+COPY main.go /go/src/github.com/rdegges/ipify-api
+COPY api /go/src/github.com/rdegges/ipify-api/api
+COPY models /go/src/github.com/rdegges/ipify-api/models
+
+WORKDIR /go/src/github.com/rdegges/ipify-api
+
+RUN go get -v -d
+RUN ls -al
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
+
+FROM scratch
+
+WORKDIR /
+
+COPY --from=0 /go/src/github.com/rdegges/ipify-api/app .
+
+CMD ["./app"]

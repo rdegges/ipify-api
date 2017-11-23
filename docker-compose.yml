@@ -1,13 +1,13 @@
-version: '2'
+version: '3'
 services:
   api:
-    build: .
+    build:
+      context: .
     volumes:
-      - ./main.go:/var/www/main.go
-      - ./api/:/var/www/api/
-      - ./models:/var/www/models
+      - ./main.go:/go/src/github.com/rdegges/ipify-api/main.go
+      - ./api:/go/src/github.com/rdegges/ipify-api/api
+      - ./models:/go/src/github.com/rdegges/ipify-api/models
     environment:
       - PORT=9091
     ports:
       - "9091:9091"
-    

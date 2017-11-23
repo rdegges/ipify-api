@@ -31,9 +31,17 @@ func GetIP(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	// list.  We do this because this is always the *origin* IP address, which
 	// is the *true* IP of the user.  For more information on this, see the
 	// Wikipedia page: https://en.wikipedia.org/wiki/X-Forwarded-For
-	ip := net.ParseIP(strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]).String()
+	address := net.ParseIP(strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0])
 
-	fmt.Fprintln(os.Stderr, "WOOT:", r.Header.Get("X-Forwarded-For"))
+	// If this is not present, then fall back to r.RemoteAddr instead. Note that this
+	// is the origin of the previous request originator and may be a proxy etc.
+	if address == nil {
+		address = net.ParseIP(strings.Split(r.RemoteAddr, ":")[0])
+	}
+
+	ip := address.String()
+
+	fmt.Fprintln(os.Stdout, "WOOT:", ip)
 
 	// If the user specifies a 'format' querystring, we'll try to return the
 	// user's IP address in the specified format.
