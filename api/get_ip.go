@@ -12,7 +12,6 @@ import (
 	"github.com/rdegges/ipify-api/models"
 	"net"
 	"net/http"
-	"os"
 	"strings"
 )
 

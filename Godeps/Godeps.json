@@ -1,0 +1,16 @@
+{
+	"ImportPath": "github.com/rdegges/ipify-api",
+	"GoVersion": "go1.8",
+	"GodepVersion": "v79",
+	"Deps": [
+		{
+			"ImportPath": "github.com/julienschmidt/httprouter",
+			"Comment": "v1.1-7-g9034cff",
+			"Rev": "9034cff70da2ab5888417e40d23cd213a1587f16"
+		},
+		{
+			"ImportPath": "github.com/rs/cors",
+			"Rev": "eb527c8097e0f19a3ff7b253a3fe70545070f420"
+		}
+	]
+}
