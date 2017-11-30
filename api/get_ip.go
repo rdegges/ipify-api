@@ -40,8 +40,6 @@ func GetIP(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	ip := address.String()
 
-	fmt.Fprintln(os.Stdout, "WOOT:", ip)
-
 	// If the user specifies a 'format' querystring, we'll try to return the
 	// user's IP address in the specified format.
 	if format, ok := r.Form["format"]; ok && len(format) > 0 {
