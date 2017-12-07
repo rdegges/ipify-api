@@ -8,11 +8,12 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/julienschmidt/httprouter"
-	"github.com/rdegges/ipify-api/models"
 	"net"
 	"net/http"
 	"strings"
+
+	"github.com/DNSFilter/ipify-api/models"
+	"github.com/julienschmidt/httprouter"
 )
 
 // GetIP returns a user's public facing IP address (IPv4 OR IPv6).
@@ -26,16 +27,26 @@ func GetIP(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		panic(err)
 	}
 
-	// We'll always grab the first IP address in the X-Forwarded-For header
-	// list.  We do this because this is always the *origin* IP address, which
-	// is the *true* IP of the user.  For more information on this, see the
-	// Wikipedia page: https://en.wikipedia.org/wiki/X-Forwarded-For
-	ip := net.ParseIP(strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0]).String()
+	// We test in order of priority valid client IP headers
+	ip := net.ParseIP(r.Header.Get("CF-Connecting-IP"))
+
+	if ip == nil {
+		// We'll always grab the first IP address in the X-Forwarded-For header
+		// list.  We do this because this is always the *origin* IP address, which
+		// is the *true* IP of the user.  For more information on this, see the
+		// Wikipedia page: https://en.wikipedia.org/wiki/X-Forwarded-For
+		ip = net.ParseIP(strings.Split(r.Header.Get("i"), ",")[0])
+	}
+
+	if ip == nil {
+		host, _, _ := net.SplitHostPort(r.RemoteAddr)
+		ip = net.ParseIP(host)
+	}
 
 	// If the user specifies a 'format' querystring, we'll try to return the
 	// user's IP address in the specified format.
 	if format, ok := r.Form["format"]; ok && len(format) > 0 {
-		jsonStr, _ := json.Marshal(models.IPAddress{ip})
+		jsonStr, _ := json.Marshal(models.IPAddress{ip.String()})
 
 		switch format[0] {
 		case "json":
@@ -59,5 +70,5 @@ func GetIP(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	// If no 'format' querystring was specified, we'll default to returning the
 	// IP in plain text.
 	w.Header().Set("Content-Type", "text/plain")
-	fmt.Fprintf(w, ip)
+	fmt.Fprintf(w, ip.String())
 }
