@@ -35,7 +35,7 @@ func GetIP(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		// list.  We do this because this is always the *origin* IP address, which
 		// is the *true* IP of the user.  For more information on this, see the
 		// Wikipedia page: https://en.wikipedia.org/wiki/X-Forwarded-For
-		ip = net.ParseIP(strings.Split(r.Header.Get("i"), ",")[0])
+		ip = net.ParseIP(strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0])
 	}
 
 	if ip == nil {
