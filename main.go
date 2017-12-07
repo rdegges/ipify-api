@@ -8,12 +8,13 @@
 package main
 
 import (
-	"github.com/julienschmidt/httprouter"
-	"github.com/rdegges/ipify-api/api"
-	"github.com/rs/cors"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/julienschmidt/httprouter"
+	"github.com/rdegges/ipify-api/api"
+	"github.com/rs/cors"
 )
 
 // main launches our web server which runs indefinitely.
@@ -39,5 +40,4 @@ func main() {
 
 	log.Println("Starting HTTP server on port:", port)
 	log.Fatal(http.ListenAndServe(":"+port, handler))
-
 }
