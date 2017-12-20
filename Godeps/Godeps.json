@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/DNSFilter/ipify-api",
-	"GoVersion": "go1.9.2",
+	"GoVersion": "go1.8",
 	"GodepVersion": "v79",
 	"Deps": [
 		{
