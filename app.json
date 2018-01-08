@@ -1,0 +1,7 @@
+{
+  "name": "ipify-api",
+  "description": "A simple public IP address API.",
+  "repository": "https://github.com/rdegges/ipify-api",
+  "logo": "https://www.ipify.org/static/images/globe.png",
+  "keywords": ["go", "ipify", "ip", "address", "api"]
+}
