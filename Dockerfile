@@ -9,7 +9,6 @@ COPY models /go/src/github.com/rdegges/ipify-api/models
 WORKDIR /go/src/github.com/rdegges/ipify-api
 
 RUN go get -v -d
-RUN ls -al
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
 
 FROM scratch
