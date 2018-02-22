@@ -1,5 +1,4 @@
 # ipify-api
-
 *A Simple Public IP Address API*
 
 
