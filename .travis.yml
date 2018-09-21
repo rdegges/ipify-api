@@ -1,7 +1,31 @@
-sudo: false
+dist: trusty
+
 language: go
+
 go:
-  - 1.8
-before_script: go get github.com/mitchellh/gox
-script: go build
-after_success: gox -osarch="linux/amd64" && echo $TRAVIS_TEST_RESULT
+- 1.8.x
+- 1.9.x
+
+cache:
+  directories:
+  - ${TRAVIS_BUILD_DIR}/vendor
+
+services:
+- docker
+
+install:
+- go get github.com/golang/dep/cmd/dep
+- dep ensure
+
+before_script:
+- docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+
+script:
+- make build
+
+after_success:
+- if [ -n "$TRAVIS_TAG" ]; then
+  make TAG=${TRAVIS_TAG} deploy;
+  fi
+- make TAG=latest deploy
+- make TAG=${TRAVIS_COMMIT} deploy
