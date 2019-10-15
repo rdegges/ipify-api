@@ -36,6 +36,7 @@ func GetIP(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	// user's IP address in the specified format.
 	if format, ok := r.Form["format"]; ok && len(format) > 0 {
 		jsonStr, _ := json.Marshal(models.IPAddress{ip})
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 
 		switch format[0] {
 		case "json":
