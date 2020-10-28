@@ -57,7 +57,7 @@ func GetIP(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		case "xml":
 			w.Header.Set("Content-Type", "application/xml")
 			xmlStr, _ := xml.MarshalIndent(models.IPAddress{ip}, " ", "  ")
-			fmt.Fprintf(w, string(xmlStr))
+			fmt.Fprintf(w, xml.Header + string(xmlStr))
 			return
 		}
 	}
