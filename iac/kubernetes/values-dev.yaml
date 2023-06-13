@@ -1,0 +1,75 @@
+# The environmentt of the application. (develop, staging, prod)
+environment: develop
+
+# Define the container image configrations.
+image:
+  repository: 968519194283.dkr.ecr.us-east-1.amazonaws.com/ip
+
+# The ports the application listen.
+containerPorts:
+ - port: 3000
+   name: http
+
+# The port that the kubernetes service will expose (this allows for intra-cluster communication)
+servicePort: 80
+serviceTargetPort: 3000 
+
+# Horizontal Pod Autoscaler. This define the min and the max amount of pods.
+horizontalPodAutoscaler:
+  minReplicas: 1
+  maxReplicas: 2
+  targetCPUUtilizationPercentage: 90
+
+# The amount of resources this pod receive.
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 500Mi
+
+# The entrypoint command for the application
+command: "/app/ip"
+
+# secretsValues:
+#   - secretName: secret_one
+#     secretArn: "arn:aws:secretsmanager:us-east-2:968519194283:secret:/dev/template/template-secret-one-d7rI5d"
+#     secretEnv: SECRET_ONE
+
+##################################################
+#            ADVANCED OPTIONS                    #
+#  ask for help if you need to change those      #
+##################################################
+
+# Addtional pod annotations
+serviceAccountName: api-dev-sa #Precreated serviceAccount to be used based on api-dev, if you want to use your own, define the role ahead
+# serviceAccountAnnotations:
+#   eks.amazonaws.com/role-arn: arn:aws:iam::968519194283:role/eksctl-apps-non-prod-addon-iamserviceaccount-Role1-1AYKKWPYY59GQ
+
+# This is used to check if a container is up and running.
+# livenessProbe:
+#   path: /health
+#   port: http # You can use the name of the port listed on the `ports` section.
+#   initialDelay: 30
+#   failureThreshold: 6
+#   timeoutSeconds: 5
+#   periodSeconds: 15
+  
+
+# This is used to check if a contatiner is able to receive connections.
+# readinessProbe:
+#   path: /health
+#   port: http # You can use the name of the port listed on the `ports` section.
+#   initialDelay: 0
+#   failureThreshold: 10
+#   timeoutSeconds: 5
+#   periodSeconds: 5
+  
+# This make the service public to the network.
+enableService: true
+
+# Should introduce a enableIngress boolean for make it non-public to network
+
+# Path where it can find the routes on the webserver
+servicePrefix: /

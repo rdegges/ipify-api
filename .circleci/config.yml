@@ -1,0 +1,156 @@
+version: 2.1
+parameters:
+  project_name:
+    type: string
+    default: ip
+  image_test:
+    type: string
+    default: cimg/go:1.19.3
+  image_machine:
+    type: string
+    default: ubuntu-2204:2022.04.2
+  image_deploy:
+    type: string
+    default: cimg/deploy:2022.06.1
+  helm_chart_version:
+    type: string
+    default: "0.0.2"
+  domain:
+    type: string
+    default: dnsfilter.sh
+  
+jobs:
+  build-push-docker-image:
+   machine:
+     image: << pipeline.parameters.image_machine >>
+   steps:
+    - checkout
+    - run:
+        name: Hadolint run
+        command: |
+          docker run --rm -i hadolint/hadolint < Dockerfile  
+    - run:
+        name: Docker build
+        command: |
+          docker build -t dnsfilter/<< pipeline.parameters.project_name >>:${CIRCLE_SHA1} .
+    - run:
+        name: Install trivy
+        command: |
+          sudo apt update && sudo apt install curl
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+    - run:
+        name: Scan the local image with trivy
+        command: trivy image --exit-code 0 --no-progress dnsfilter/<< pipeline.parameters.project_name >>:${CIRCLE_SHA1}
+    - run:    
+        name: Docker build, tag and push
+        command: |
+          sudo apt update
+          sudo apt install -y awscli
+          docker tag dnsfilter/<< pipeline.parameters.project_name >>:${CIRCLE_SHA1} ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/<< pipeline.parameters.project_name >>:${CIRCLE_SHA1}
+          export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+          export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+          aws ecr get-login-password --region ${AWS_REGION_PROD} | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/
+          docker push ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/<< pipeline.parameters.project_name >>:${CIRCLE_SHA1}
+
+  deploy-dev-k8s:
+    machine:
+      image: << pipeline.parameters.image_machine >>
+    steps:
+      - checkout
+      - run:
+          name: Update kubeconfig and deploy
+          command: |
+            curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+            sudo apt install apt-transport-https --yes
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+            sudo apt update
+            sudo apt install -y helm
+            aws eks --region ${AWS_REGION_NON_PROD} update-kubeconfig --name ${CLUSTER_NAME_APPS_NON_PROD}
+            helm repo add dnsfilter https://raw.githubusercontent.com/DNSFilter/iac_helm_charts/main/ --username ${GITHUB_USER} --password ${GITHUB_ACCESS_TOKEN}
+            helm repo update 
+            helm upgrade -i << pipeline.parameters.project_name >> -f ./iac/kubernetes/values-dev.yaml dnsfilter/service --version << pipeline.parameters.helm_chart_version >> --set image.tag=${CIRCLE_SHA1} --set ingressHost="<< pipeline.parameters.project_name >>.dev.<< pipeline.parameters.domain >>" -n develop
+  deploy-stg-k8s:
+    machine: 
+      image: << pipeline.parameters.image_machine >>
+    steps:
+      - checkout
+      - run:
+          name: Docker build, tag and push
+          command: |
+            sudo apt update
+            sudo apt install -y awscli docker
+            docker build -t ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/<< pipeline.parameters.project_name >>:${CIRCLE_BRANCH} .
+            export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+            export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+            aws ecr get-login-password --region ${AWS_REGION_PROD} | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/
+            docker push ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/<< pipeline.parameters.project_name >>:${CIRCLE_BRANCH}
+      - run:
+          name: Update kubeconfig and deploy
+          command: |
+            curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+            sudo apt install apt-transport-https --yes
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+            sudo apt update
+            sudo apt install -y helm
+            aws eks --region ${AWS_REGION_NON_PROD} update-kubeconfig --name ${CLUSTER_NAME_APPS_NON_PROD}
+            helm repo add dnsfilter https://raw.githubusercontent.com/DNSFilter/iac_helm_charts/main/ --username ${GITHUB_USER} --password ${GITHUB_ACCESS_TOKEN}
+            helm repo update 
+            helm upgrade -i << pipeline.parameters.project_name >> -f ./iac/kubernetes/values-staging.yaml dnsfilter/service --version << pipeline.parameters.helm_chart_version >> --set image.tag=${CIRCLE_BRANCH} --set ingressHost="<< pipeline.parameters.project_name >>.stg.<< pipeline.parameters.domain >>" -n staging
+  deploy-prod-k8s:
+    machine: 
+      image: << pipeline.parameters.image_machine >>
+    steps:
+      - checkout
+      - run:
+          name: Release to prod
+          command: |
+            sudo apt update
+            sudo apt install -y awscli docker
+            export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+            export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+            aws ecr get-login-password --region ${AWS_REGION_PROD} | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/
+            docker pull ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/<< pipeline.parameters.project_name >>:staging
+            docker tag ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/<< pipeline.parameters.project_name >>:staging ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/<< pipeline.parameters.project_name >>:production
+            docker push ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/<< pipeline.parameters.project_name >>:production
+      - run:
+          name: Update kubeconfig and install helm chart
+          command: |
+            curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+            sudo apt install apt-transport-https --yes
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+            sudo apt update
+            sudo apt install -y helm
+            aws eks --region ${AWS_REGION_PROD} update-kubeconfig --name ${CLUSTER_NAME_APPS_PROD}
+            helm repo add dnsfilter https://raw.githubusercontent.com/DNSFilter/iac_helm_charts/main/ --username ${GITHUB_USER} --password ${GITHUB_ACCESS_TOKEN}
+            helm repo update 
+            helm upgrade -i << pipeline.parameters.project_name >> -f ./iac/kubernetes/values-prod.yaml dnsfilter/service --version << pipeline.parameters.helm_chart_version >> --set image.tag=production -n prod --set ingressHost="<< pipeline.parameters.project_name >>.<< pipeline.parameters.domain >>" --force
+workflows:
+  version: 2
+  deploy:
+    jobs:
+      - deploy-prod-k8s:
+          context: aws-prod
+          filters:
+            branches:
+              only:
+                - prod
+      - deploy-stg-k8s:
+          context: aws-non-prod
+          filters:
+            branches:
+              only:
+                - staging
+      - build-push-docker-image:
+          context: aws-non-prod
+          filters:
+            branches:
+              only:
+                - refactor
+      - deploy-dev-k8s:
+          requires:
+            - build-push-docker-image
+          context: aws-non-prod
+          filters:
+            branches:
+              only:
+                - refactor
