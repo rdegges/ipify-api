@@ -1,9 +1,9 @@
 # The environmentt of the application. (develop, staging, prod)
-environment: production
+environment: prod
 
 # Define the container image configrations.
 image:
-  repository: 968519194283.dkr.ecr.us-east-1.amazonaws.com/changeme
+  repository: 968519194283.dkr.ecr.us-east-1.amazonaws.com/ip
 
 # The ports the application listen.
 containerPorts:
@@ -16,9 +16,9 @@ serviceTargetPort: 3000
 
 # Horizontal Pod Autoscaler. This define the min and the max amount of pods.
 horizontalPodAutoscaler:
-  minReplicas: 1
+  minReplicas: 2
   maxReplicas: 10
-  targetCPUUtilizationPercentage: 90
+  targetCPUUtilizationPercentage: 70
 
 # The amount of resources this pod receive.
 resources:
@@ -30,12 +30,12 @@ resources:
     memory: 500Mi
 
 # The entrypoint command for the application
-command: "/app/server"
+command: "/app/ip"
 
-secretsValues:
-  - secretName: secret_one
-    secretArn: "arn:aws:secretsmanager:us-east-2:968519194283:secret:/prod/template/template-secret-one-d7rI5d"
-    secretEnv: SECRET_ONE
+# secretsValues:
+#   - secretName: secret_one
+#     secretArn: "arn:aws:secretsmanager:us-east-2:968519194283:secret:/dev/template/template-secret-one-d7rI5d"
+#     secretEnv: SECRET_ONE
 
 ##################################################
 #            ADVANCED OPTIONS                    #
@@ -43,28 +43,28 @@ secretsValues:
 ##################################################
 
 # Addtional pod annotations
-serviceAccountName: api-prod #Precreated serviceAccount to be used based on api-dev, if you want to use your own, define the role ahead
+serviceAccountName: api-prod-sa #Precreated serviceAccount to be used based on api-dev, if you want to use your own, define the role ahead
 # serviceAccountAnnotations:
 #   eks.amazonaws.com/role-arn: arn:aws:iam::968519194283:role/eksctl-apps-non-prod-addon-iamserviceaccount-Role1-1AYKKWPYY59GQ
 
 # This is used to check if a container is up and running.
-livenessProbe:
-  path: /health
-  port: http # You can use the name of the port listed on the `ports` section.
-  initialDelay: 30
-  failureThreshold: 6
-  timeoutSeconds: 5
-  periodSeconds: 15
+# livenessProbe:
+#   path: /health
+#   port: http # You can use the name of the port listed on the `ports` section.
+#   initialDelay: 30
+#   failureThreshold: 6
+#   timeoutSeconds: 5
+#   periodSeconds: 15
   
 
 # This is used to check if a contatiner is able to receive connections.
-readinessProbe:
-  path: /health
-  port: http # You can use the name of the port listed on the `ports` section.
-  initialDelay: 0
-  failureThreshold: 10
-  timeoutSeconds: 5
-  periodSeconds: 5
+# readinessProbe:
+#   path: /health
+#   port: http # You can use the name of the port listed on the `ports` section.
+#   initialDelay: 0
+#   failureThreshold: 10
+#   timeoutSeconds: 5
+#   periodSeconds: 5
   
 # This make the service public to the network.
 enableService: true
