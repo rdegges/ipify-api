@@ -32,6 +32,8 @@ resources:
 # The entrypoint command for the application
 command: "/app/ip"
 
+ingressHost: ip.dnsfilter.com
+
 # secretsValues:
 #   - secretName: secret_one
 #     secretArn: "arn:aws:secretsmanager:us-east-2:968519194283:secret:/dev/template/template-secret-one-d7rI5d"
