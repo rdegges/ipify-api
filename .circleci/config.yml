@@ -124,7 +124,7 @@ jobs:
             aws eks --region ${AWS_REGION_PROD} update-kubeconfig --name ${CLUSTER_NAME_APPS_PROD}
             helm repo add dnsfilter https://raw.githubusercontent.com/DNSFilter/iac_helm_charts/main/ --username ${GITHUB_USER} --password ${GITHUB_ACCESS_TOKEN}
             helm repo update 
-            helm upgrade -i << pipeline.parameters.project_name >> -f ./iac/kubernetes/values-prod.yaml dnsfilter/service --version << pipeline.parameters.helm_chart_version >> --set image.tag=${CIRCLE_TAG} -n prod --set ingressHost="<< pipeline.parameters.project_name >>.<< pipeline.parameters.domain >>" --force
+            helm upgrade -i << pipeline.parameters.project_name >> -f ./iac/kubernetes/values-prod.yaml dnsfilter/service --version << pipeline.parameters.helm_chart_version >> --set image.tag=${CIRCLE_TAG} -n prod --force
 workflows:
   version: 2
   deploy:
