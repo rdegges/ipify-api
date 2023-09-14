@@ -26,8 +26,36 @@ jobs:
    steps:
     - checkout
     - run:
+          name: Install dependencies
+          command: |
+            sudo apt update
+            sudo apt install -y awscli docker
+      - run:
+          name: Setup AWS assume role
+          command: |
+            read -r AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN \
+              < <(aws sts assume-role-with-web-identity \
+                  --role-arn "${AWS_ROLE_ARN}" \
+                  --role-session-name "${AWS_ROLE_SESSION_NAME}" \
+                  --web-identity-token "${CIRCLE_OIDC_TOKEN_V2}" \
+                  "$@" \
+                  --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
+                  --output text)
+            if [ -z "${AWS_ACCESS_KEY_ID}" ] || [ -z "${AWS_SECRET_ACCESS_KEY}" ] || [ -z "${AWS_SESSION_TOKEN}" ]; then
+                echo "Failed to assume role"
+                exit 1
+            else
+                {
+                    echo "export AWS_ACCESS_KEY_ID=\"${AWS_ACCESS_KEY_ID}\""
+                    echo "export AWS_SECRET_ACCESS_KEY=\"${AWS_SECRET_ACCESS_KEY}\""
+                    echo "export AWS_SESSION_TOKEN=\"${AWS_SESSION_TOKEN}\""
+                } >>"$BASH_ENV"
+                echo "Assume role with web identity succeeded"
+            fi
+    - run:
         name: Hadolint run
         command: |
+          source ${BASH_ENV}
           docker run --rm -i hadolint/hadolint < Dockerfile  
     - run:
         name: Docker build
@@ -45,10 +73,7 @@ jobs:
         name: Docker build, tag and push
         command: |
           sudo apt update
-          sudo apt install -y awscli
           docker tag dnsfilter/<< pipeline.parameters.project_name >>:${CIRCLE_SHA1} ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/<< pipeline.parameters.project_name >>:${CIRCLE_SHA1}
-          export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-          export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
           aws ecr get-login-password --region ${AWS_REGION_PROD} | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/
           docker push ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/<< pipeline.parameters.project_name >>:${CIRCLE_SHA1}
 
@@ -58,8 +83,36 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install dependencies
+          command: |
+            sudo apt update
+            sudo apt install -y awscli
+      - run:
+          name: Setup AWS assume role
+          command: |
+            read -r AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN \
+              < <(aws sts assume-role-with-web-identity \
+                  --role-arn "${AWS_ROLE_ARN}" \
+                  --role-session-name "${AWS_ROLE_SESSION_NAME}" \
+                  --web-identity-token "${CIRCLE_OIDC_TOKEN_V2}" \
+                  "$@" \
+                  --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
+                  --output text)
+            if [ -z "${AWS_ACCESS_KEY_ID}" ] || [ -z "${AWS_SECRET_ACCESS_KEY}" ] || [ -z "${AWS_SESSION_TOKEN}" ]; then
+                echo "Failed to assume role"
+                exit 1
+            else
+                {
+                    echo "export AWS_ACCESS_KEY_ID=\"${AWS_ACCESS_KEY_ID}\""
+                    echo "export AWS_SECRET_ACCESS_KEY=\"${AWS_SECRET_ACCESS_KEY}\""
+                    echo "export AWS_SESSION_TOKEN=\"${AWS_SESSION_TOKEN}\""
+                } >>"$BASH_ENV"
+                echo "Assume role with web identity succeeded"
+            fi
+      - run:
           name: Update kubeconfig and deploy
           command: |
+            source ${BASH_ENV}
             curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
             sudo apt install apt-transport-https --yes
             echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
@@ -75,12 +128,36 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Docker tag and push for staging
+          name: Install dependencies
           command: |
             sudo apt update
             sudo apt install -y awscli docker
-            export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-            export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - run:
+          name: Setup AWS assume role
+          command: |
+            read -r AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN \
+              < <(aws sts assume-role-with-web-identity \
+                  --role-arn "${AWS_ROLE_ARN}" \
+                  --role-session-name "${AWS_ROLE_SESSION_NAME}" \
+                  --web-identity-token "${CIRCLE_OIDC_TOKEN_V2}" \
+                  "$@" \
+                  --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
+                  --output text)
+            if [ -z "${AWS_ACCESS_KEY_ID}" ] || [ -z "${AWS_SECRET_ACCESS_KEY}" ] || [ -z "${AWS_SESSION_TOKEN}" ]; then
+                echo "Failed to assume role"
+                exit 1
+            else
+                {
+                    echo "export AWS_ACCESS_KEY_ID=\"${AWS_ACCESS_KEY_ID}\""
+                    echo "export AWS_SECRET_ACCESS_KEY=\"${AWS_SECRET_ACCESS_KEY}\""
+                    echo "export AWS_SESSION_TOKEN=\"${AWS_SESSION_TOKEN}\""
+                } >>"$BASH_ENV"
+                echo "Assume role with web identity succeeded"
+            fi
+      - run:
+          name: Docker tag and push for staging
+          command: |
+            source ${BASH_ENV}
             aws ecr get-login-password --region ${AWS_REGION_PROD} | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/
             docker pull ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/<< pipeline.parameters.project_name >>:${CIRCLE_SHA1}
             docker tag ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/<< pipeline.parameters.project_name >>:${CIRCLE_SHA1} ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/<< pipeline.parameters.project_name >>:${CIRCLE_TAG}
@@ -103,12 +180,37 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Release to prod
+          name: Install dependencies
           command: |
             sudo apt update
             sudo apt install -y awscli docker
-            export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-            export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - run:
+          name: Setup AWS assume role
+          command: |
+            read -r AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN \
+              < <(aws sts assume-role-with-web-identity \
+                  --role-arn "${AWS_ROLE_ARN}" \
+                  --role-session-name "${AWS_ROLE_SESSION_NAME}" \
+                  --web-identity-token "${CIRCLE_OIDC_TOKEN_V2}" \
+                  "$@" \
+                  --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
+                  --output text)
+            if [ -z "${AWS_ACCESS_KEY_ID}" ] || [ -z "${AWS_SECRET_ACCESS_KEY}" ] || [ -z "${AWS_SESSION_TOKEN}" ]; then
+                echo "Failed to assume role"
+                exit 1
+            else
+                {
+                    echo "export AWS_ACCESS_KEY_ID=\"${AWS_ACCESS_KEY_ID}\""
+                    echo "export AWS_SECRET_ACCESS_KEY=\"${AWS_SECRET_ACCESS_KEY}\""
+                    echo "export AWS_SESSION_TOKEN=\"${AWS_SESSION_TOKEN}\""
+                } >>"$BASH_ENV"
+                echo "Assume role with web identity succeeded"
+            fi
+      - run:
+          name: Release to prod
+          command: |
+            source ${BASH_ENV}
+            sudo apt update
             aws ecr get-login-password --region ${AWS_REGION_PROD} | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/
             docker pull ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/<< pipeline.parameters.project_name >>:${CIRCLE_SHA1}
             docker tag ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/<< pipeline.parameters.project_name >>:${CIRCLE_SHA1} ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION_PROD}.amazonaws.com/<< pipeline.parameters.project_name >>:${CIRCLE_TAG}
