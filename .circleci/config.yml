@@ -223,10 +223,10 @@ jobs:
             echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
             sudo apt update
             sudo apt install -y helm
-            aws eks --region ${AWS_REGION_PROD} update-kubeconfig --name ${CLUSTER_NAME_APPS_PROD}
+            aws eks --region ${AWS_REGION_PROD} update-kubeconfig --name ${CLUSTER_NAME_PLATFORM}
             helm repo add dnsfilter https://raw.githubusercontent.com/DNSFilter/iac_helm_charts/main/ --username ${GITHUB_USER} --password ${GITHUB_ACCESS_TOKEN}
             helm repo update 
-            helm upgrade -i << pipeline.parameters.project_name >> -f ./iac/kubernetes/values-prod.yaml dnsfilter/service --version << pipeline.parameters.helm_chart_version >> --set image.tag=${CIRCLE_TAG} -n prod --force
+            helm upgrade -i << pipeline.parameters.project_name >> -f ./iac/kubernetes/values-prod.yaml dnsfilter/service --version << pipeline.parameters.helm_chart_version >> --set image.tag=${CIRCLE_TAG} -n ip --force
 workflows:
   version: 2
   deploy:
