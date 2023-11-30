@@ -23,8 +23,8 @@ horizontalPodAutoscaler:
 # The amount of resources this pod receive.
 resources:
   requests:
-    cpu: 100m
-    memory: 128Mi
+    cpu: 500m
+    memory: 500Mi
   limits:
     cpu: 500m
     memory: 500Mi
@@ -32,7 +32,7 @@ resources:
 # The entrypoint command for the application
 command: "/app/ip"
 
-ingressHost: ip.dnsfilter.com
+ingressHost: ip.platform-engineering.dnsfilter.cc
 
 # secretsValues:
 #   - secretName: secret_one
